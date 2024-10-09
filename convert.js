@@ -101,7 +101,7 @@ function loadImage(file) {
 
                 console.log(data.length);
                 let f = -1;
-                for (let i = 0; i < data.length; i += 4) {
+                for (let i = 0; i < data.length; i += 4) { //最大 3/2倍になってしまう U+0000からU+007Fまでを使う事で8/7倍で抑えられる
                     const r = data[i];
                     const g = data[i + 1];
                     const b = data[i + 2];
