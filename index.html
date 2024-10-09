@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-16">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VRC Image Converter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div style="font-size: x-large;"><b>VRChat Image Converter</b></div>
+    
+    <div class="image-space" id="drop-area">
+        画像をドラッグ&ドロップで読み込み
+        <img id="preview" src="" alt="画像プレビュー" style="display:none;">
+    </div>
+
+    <canvas id="image-canvas" style="display:none;"></canvas>
+    <img id="internal-image" src="" alt="internal image" style="display:none;">
+    
+    <div class="button-container">
+        <input type="file" id="file-input" accept="image/*" style="display: none;">
+        <button id="select-button">画像を選択する</button>
+    </div>
+
+    <div class="button-container">
+        <button id="copy-button">文字列をコピー</button>
+    </div>
+
+    <div class="button-container">
+        <button id="download-button">文字列をtxtとしてダウンロード</button>
+    </div>
+
+    <div id="message" style="color: green; display: none;"></div>
+
+    <script src="convert.js"></script>
+</body>
+</html>
