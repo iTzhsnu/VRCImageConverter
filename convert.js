@@ -99,9 +99,10 @@ function loadImage(file) {
                 const data = imageData.data;
                 text = '';
 
-                console.log(data.length);
+                const dataLength = data.length;
                 let f = -1;
-                for (let i = 0; i < data.length; i += 4) { //最大 3/2倍になってしまう U+0000からU+007Fまでを使う事で8/7倍で抑えられる
+                console.log(dataLength);
+                for (let i = 0; i < dataLength; i += 4) { //最大 3/2倍になってしまう U+0000からU+007Fまでを使う事で8/7倍で抑えられる
                     const r = data[i];
                     const g = data[i + 1];
                     const b = data[i + 2];
@@ -109,12 +110,13 @@ function loadImage(file) {
                     if (f == -1) {
                         text += String.fromCharCode(r + g * 256);
                         f = b;
+                        if (i + 1 == dataLength) text += String.fromCharCode(b);
                     } else {
                         text += String.fromCharCode(f + r * 256, g + b * 256);
                         f = -1;
                     }
                 }
-                message.textContent = '画像を文字列に変換しました。'; //完成した事を報告する
+                message.textContent = '画像を文字列に変換しました。';
                 message.style.display = 'block';
             }, 0);
         };
