@@ -18,7 +18,7 @@ downloadButton.addEventListener('click', () => {
     // ダウンロード用のaタグ生成
     const a = document.createElement('a');
     a.href =  URL.createObjectURL(blob);
-    a.download = 'sample.txt';
+    a.download = 'convertedImage.txt';
     a.click();
 });
 
@@ -56,7 +56,7 @@ dropArea.addEventListener('drop', (event) => {
 
     const files = event.dataTransfer.files;
     if (files.length > 0) {
-        loadImage(files[0]);
+        loadAndConvertImage(files[0]);
     }
 });
 
@@ -69,57 +69,103 @@ selectButton.addEventListener('click', () => {
 fileInput.addEventListener('change', () => {
     const files = fileInput.files;
     if (files.length > 0) {
-        loadImage(files[0]);
+        loadAndConvertImage(files[0]);
     }
 });
 
-// 画像を読み込む関数
-function loadImage(file) {
+// 画像を読み込みから変換まで
+function loadAndConvertImage(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-        internalImage.src = e.target.result; //処理用画像ロード
+        internalImage.src = e.target.result; // 処理用画像ロード
 
+        // 画像ロード
         previewImage.src = e.target.result;
         previewImage.style.display = 'block';
         dropArea.innerHTML = '';
         dropArea.style.border = 'none';
         dropArea.appendChild(previewImage);
 
+        // 画像を文字列に変換
         internalImage.onload = () => {
-            // Canvasのサイズを画像に合わせる
-            console.log(internalImage.width + ", " + internalImage.height);
-            canvas.width = internalImage.width;
-            canvas.height = internalImage.height;
-            // 画像をCanvasに描画
+            //console.log(internalImage.width + ", " + internalImage.height);
+            const w = internalImage.width;
+            const h = internalImage.height;
+
+            canvas.width = w;
+            canvas.height = h;
             ctx.drawImage(internalImage, 0, 0);
 
-            // ピクセル毎のRGBを非同期に取得
             setTimeout(() => {
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
+                //const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                //const data = imageData.data;
+                //const length = data.length;
                 text = '';
 
-                const dataLength = data.length;
-                let f = -1;
-                console.log(dataLength);
-                for (let i = 0; i < dataLength; i += 4) { //最大 3/2倍になってしまう U+0000からU+007Fまでを使う事で8/7倍で抑えられる
-                    const r = data[i];
-                    const g = data[i + 1];
-                    const b = data[i + 2];
+                let data2 = [];
+                for (let i = 1; h >= i; ++i) {
+                    const data = ctx.getImageData(0, h - i, w, 1).data;
+                    const length = data.length;
 
-                    if (f == -1) {
-                        text += String.fromCharCode(r + g * 256);
-                        f = b;
-                        if (i + 1 == dataLength) text += String.fromCharCode(b);
-                    } else {
-                        text += String.fromCharCode(f + r * 256, g + b * 256);
-                        f = -1;
+                    for (let n = 0; length > n; n += 4) {
+                        data2.push(data[n], data[n + 1], data[n + 2]);
                     }
                 }
+
+                convertToBase64(data2);
+                
                 message.textContent = '画像を文字列に変換しました。';
                 message.style.display = 'block';
             }, 0);
         };
     };
     reader.readAsDataURL(file);
+}
+
+// 6Bit (Base 64)で変換
+// 文字の使用範囲: UTF+0000 to UTF+003F
+// 容量倍率 4/3倍
+function convertToBase64(data) {
+    const length = data.length;
+    let string = "";
+
+    for (let i = 0; length > i; i += 3) {
+        const value1 = data[i] >> 2;
+        if (length - i > 2) {
+            const value2 = ((data[i] & 0x3) << 4) + (data[i + 1] >> 4);
+            const value3 = ((data[i + 1] & 0xF) << 2) + (data[i + 2] >> 6);
+            const value4 = (data[i + 2] & 0x3F);
+
+            string += base64Table(value1) + base64Table(value2) + base64Table(value3) + base64Table(value4);
+        } else {
+            if (length - i > 0) {
+                const value2 = ((data[i] & 0x3) << 4) + (data[i + 1] >> 4);
+                if (length - i > 1) {
+                    const value3 = ((data[i + 1] & 0xF) << 2) + (data[i + 2] >> 6);
+
+                    string += base64Table(value1) + base64Table(value2) + base64Table(value3) + "=";
+                } else {
+                    string += base64Table(value1) + base64Table(value2) + base64Table((data[i + 1] & 0xF) << 2) + "=";
+                }
+            } else {
+                string += base64Table(value1) + base64Table((data[i] & 0x3) << 4) + "==";
+            }
+        }
+    }
+
+    text = string;
+}
+
+function base64Table(i) {
+    if (i < 26) { // 0 to 25 => A to Z
+        return String.fromCharCode(i + 65); // 65 to 90 (UTF+0041 to UTF+005A)
+    } else if (i < 52) { // 26 to 51 => a to z
+        return String.fromCharCode(i + 71); // 97 to 122 (UTF+0061 to UTF+007A)
+    } else if (i < 62) { // 52 to 61 => 0 to 9
+        return String.fromCharCode(i - 4); // 48 to 57 (UTF+0030 to UTF+0039)
+    } else if (i == 62) { // 62 => +
+        return String.fromCharCode(43); // 43 (UTF+002B)
+    } else if (i == 63) { // 63 => /
+        return String.fromCharCode(47); // 47 (UTF+002F)
+    }
 }
