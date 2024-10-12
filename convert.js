@@ -112,9 +112,13 @@ function loadAndConvertImage(file) {
                     }
                 }
 
-                convertToBase64(data2);
+                if (data2.length > 100000000) { // メガバイトなのかメビバイトなのか不明なので、とりあえず100メガバイトで制限
+                    message.textContent = '画像サイズが大きすぎます。';
+                } else {
+                    convertToBase64(data2);
+                    message.textContent = '画像を文字列に変換しました。';
+                }
                 
-                message.textContent = '画像を文字列に変換しました。';
                 message.style.display = 'block';
             }, 0);
         };
