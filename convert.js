@@ -1,58 +1,65 @@
-const dropArea = document.getElementById('drop-area');
-const previewImage = document.getElementById('preview');
-const fileInput = document.getElementById('file-input');
-const selectButton = document.getElementById('select-button');
-const copyButton = document.getElementById('copy-button');
-const message = document.getElementById('message');
-const canvas = document.getElementById('image-canvas');
-const ctx = canvas.getContext('2d', { willReadFrequently: true });
-const downloadButton = document.getElementById('download-button');
-const internalImage = document.getElementById('internal-image')
-var text = '';
+const dropArea = document.getElementById("drop-area");
+const previewImage = document.getElementById("preview");
+const fileInput = document.getElementById("file-input");
+const selectButton = document.getElementById("select-button");
+const copyButton = document.getElementById("copy-button");
+const message = document.getElementById("message");
+const canvas = document.getElementById("image-canvas");
+const ctx = canvas.getContext("2d", { willReadFrequently: true });
+const downloadButton = document.getElementById("download-button");
+const internalImage = document.getElementById("internal-image");
+var text = "";
 
 // ダウンロードボタンがクリックされたときの処理
-downloadButton.addEventListener('click', () => {
+downloadButton.addEventListener("click", () => {
     // 文字列をBlob化
-    const blob = new Blob([text], { type: 'text/plain' });
+    const blob = new Blob([text], { type: "text/plain" });
 
     // ダウンロード用のaタグ生成
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href =  URL.createObjectURL(blob);
-    a.download = 'convertedImage.txt';
+    a.download = "convertedImage.txt";
     a.click();
 });
 
 // コピーボタンがクリックされたときの処理
-copyButton.addEventListener('click', () => {
-    // クリップボードにコピー
-    navigator.clipboard.writeText(text)
+copyButton.addEventListener("click", () => {
+    if (text.length > 0) {
+        navigator.clipboard.writeText(text)
         .then(() => {
-            // コピー成功時にメッセージを表示
-            message.textContent = 'クリップボードに保存しました。';
-            message.style.display = 'block';
-
-            setTimeout(() => {
-                message.style.display = 'none';
-            }, 5000);
+            message.textContent = "クリップボードに保存しました。";
+            message.style.color = "green";
         })
         .catch((err) => {
-            console.error('コピーに失敗しました: ', err);
+            console.error("コピーに失敗しました: ", err);
+            message.textContent = "コピーに失敗しました。";
+            message.style.color = "red";
         });
+    } else {
+        message.textContent = "変換されている画像がありません。";
+        message.style.color = "red";
+    }
+
+    message.style.display = "block";
+
+    setTimeout(() => {
+        message.style.display = "none";
+    }, 5000);
 });
 
-dropArea.addEventListener('dragover', (event) => {
+dropArea.addEventListener("dragover", (event) => {
     event.preventDefault();
-    dropArea.style.borderColor = 'blue';
+    dropArea.style.borderColor = "blue";
 });
 
-dropArea.addEventListener('dragleave', () => {
-    dropArea.style.borderColor = '#ccc';
+dropArea.addEventListener("dragleave", () => {
+    dropArea.style.borderColor = "#ccc";
 });
 
 // 画像がドロップされた時の処理
-dropArea.addEventListener('drop', (event) => {
+dropArea.addEventListener("drop", (event) => {
     event.preventDefault();
-    dropArea.style.borderColor = '#ccc';
+    dropArea.style.borderColor = "#ccc";
 
     const files = event.dataTransfer.files;
     if (files.length > 0) {
@@ -61,12 +68,12 @@ dropArea.addEventListener('drop', (event) => {
 });
 
 // 画像を選択ボタンがクリックされたときの処理
-selectButton.addEventListener('click', () => {
+selectButton.addEventListener("click", () => {
     fileInput.click(); // 隠れたinputをクリック
 });
 
 // ファイルが選択されたときの処理
-fileInput.addEventListener('change', () => {
+fileInput.addEventListener("change", () => {
     const files = fileInput.files;
     if (files.length > 0) {
         loadAndConvertImage(files[0]);
@@ -81,9 +88,9 @@ function loadAndConvertImage(file) {
 
         // 画像ロード
         previewImage.src = e.target.result;
-        previewImage.style.display = 'block';
-        dropArea.innerHTML = '';
-        dropArea.style.border = 'none';
+        previewImage.style.display = "block";
+        dropArea.innerHTML = "";
+        dropArea.style.border = "none";
         dropArea.appendChild(previewImage);
 
         // 画像を文字列に変換
@@ -100,26 +107,30 @@ function loadAndConvertImage(file) {
                 //const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 //const data = imageData.data;
                 //const length = data.length;
-                text = '';
+                text = "";
 
-                let data2 = [];
+                let rgb = [];
                 for (let i = 1; h >= i; ++i) {
                     const data = ctx.getImageData(0, h - i, w, 1).data;
                     const length = data.length;
 
-                    for (let n = 0; length > n; n += 4) {
-                        data2.push(data[n], data[n + 1], data[n + 2]);
+                    for (let n = 0; length > n; n += 4) { //R G B を入れる
+                        rgb.push(data[n], data[n + 1], data[n + 2]);
                     }
                 }
 
-                if (data2.length > 100000000) { // メガバイトなのかメビバイトなのか不明なので、とりあえず100メガバイトで制限
-                    message.textContent = '画像サイズが大きすぎます。';
+                if (rgb.length > 100000000) { // メガバイトなのかメビバイトなのか不明なので、とりあえず100メガバイトで制限
+                    message.textContent = "画像サイズが大きすぎます。";
+                    message.style.color = "red";
                 } else {
-                    convertToBase64(data2);
-                    message.textContent = '画像を文字列に変換しました。';
+                    convertToBase64([w & 0xff, w >> 8, h & 0xff, h >> 8]); //WidthとHeightを変換
+
+                    convertToBase64(rgb); //RGBを変換
+                    message.textContent = "画像を文字列に変換しました。";
+                    message.style.color = "green";
                 }
                 
-                message.style.display = 'block';
+                message.style.display = "block";
             }, 0);
         };
     };
@@ -157,7 +168,7 @@ function convertToBase64(data) {
         }
     }
 
-    text = string;
+    text += string;
 }
 
 function base64Table(i) {
