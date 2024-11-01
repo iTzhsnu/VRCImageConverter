@@ -12,14 +12,14 @@ var text = "";
 
 // ダウンロードボタンがクリックされたときの処理
 downloadButton.addEventListener("click", () => {
-    // 文字列をBlob化
-    const blob = new Blob([text], { type: "text/plain" });
-
-    // ダウンロード用のaタグ生成
-    const a = document.createElement("a");
-    a.href =  URL.createObjectURL(blob);
-    a.download = "convertedImage.txt";
-    a.click();
+    if (text.length > 0) {
+        const a = document.createElement("a");
+        a.href =  URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+        a.download = "convertedImage.txt";
+        a.click();
+    } else {
+        returnMessage("変換されている画像がありません。", "red");
+    }
 });
 
 // コピーボタンがクリックされたときの処理
@@ -27,24 +27,15 @@ copyButton.addEventListener("click", () => {
     if (text.length > 0) {
         navigator.clipboard.writeText(text)
         .then(() => {
-            message.textContent = "クリップボードに保存しました。";
-            message.style.color = "green";
+            returnMessage("クリップボードに保存しました。", "green");
         })
         .catch((err) => {
             console.error("コピーに失敗しました: ", err);
-            message.textContent = "コピーに失敗しました。";
-            message.style.color = "red";
+            returnMessage("コピーに失敗しました。", "red");
         });
     } else {
-        message.textContent = "変換されている画像がありません。";
-        message.style.color = "red";
+        returnMessage("変換されている画像がありません。", "red");
     }
-
-    message.style.display = "block";
-
-    setTimeout(() => {
-        message.style.display = "none";
-    }, 5000);
 });
 
 dropArea.addEventListener("dragover", (event) => {
@@ -120,17 +111,14 @@ function loadAndConvertImage(file) {
                 }
 
                 if (rgb.length > 100000000) { // メガバイトなのかメビバイトなのか不明なので、とりあえず100メガバイトで制限
-                    message.textContent = "画像サイズが大きすぎます。";
-                    message.style.color = "red";
+                    returnMessage("画像サイズが大きすぎます。", "red", false);
                 } else {
                     convertToBase64([w & 0xff, w >> 8, h & 0xff, h >> 8]); //WidthとHeightを変換
 
                     convertToBase64(rgb); //RGBを変換
-                    message.textContent = "画像を文字列に変換しました。";
-                    message.style.color = "green";
+                    returnMessage("画像を文字列に変換しました。", "green", false);
                 }
                 
-                message.style.display = "block";
             }, 0);
         };
     };
@@ -182,5 +170,16 @@ function base64Table(i) {
         return String.fromCharCode(43); // 43 (UTF+002B)
     } else if (i == 63) { // 63 => /
         return String.fromCharCode(47); // 47 (UTF+002F)
+    }
+}
+
+function returnMessage(text, color, useTimeOut = true) {
+    message.textContent = text;
+    message.style.color = color;
+    
+    if (useTimeOut) {
+        setTimeout(() => {
+            message.textContent = "\u00A0";
+        }, 5000);
     }
 }

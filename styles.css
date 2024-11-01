@@ -3,7 +3,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
 }
 .image-space {
@@ -24,6 +24,16 @@ body {
 .button-container {
     margin: 10px 0;
 }
-.text-field {
-    margin-left: 10px;
+p {
+    margin: 20px;
+}
+.footer {
+    margin-top: auto;
+    background-color: #f1f1f1;
+    text-align: center;
+    padding: 10px 0;
+    font-size: small;
+    color: #333;
+    border-top: 1px solid #ccc;
+    width: 100%;
 }

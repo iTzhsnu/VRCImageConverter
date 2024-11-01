@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-16">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VRC Image Converter</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <p></p>
 
     <div style="font-size: x-large;"><b>VRChat Image Converter</b></div>
     
     <div class="image-space" id="drop-area">
         画像をドラッグ&ドロップで読み込み
-        <img id="preview" src="" alt="画像プレビュー" style="display:none;">
+        <img id="preview" src="" alt="preview image" style="display:none;">
     </div>
 
     <canvas id="image-canvas" style="display:none;"></canvas>
@@ -31,8 +32,18 @@
         <button id="download-button">文字列をtxtとしてダウンロード</button>
     </div>
 
-    <div id="message" style="color: green; display: none;"></div>
+    <div id="message" style="color: green;">&nbsp;</div>
 
+    <p></p>
+
+    <div id="info">
+        注意: ここで生成された文字列を直接画像ローダーに貼らないでください。
+    </div>
+
+    <footer class="footer">
+        © 2024 husunu
+        <br><a href="https://github.com/iTzhsnu/VRCImageConverter" target="_blank">GitHub</a>
+    </footer>
     <script src="convert.js"></script>
 </body>
 </html>
