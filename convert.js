@@ -112,8 +112,10 @@ function loadAndConvertImage(file) {
 
                 if (rgb.length > 100000000) { // メガバイトなのかメビバイトなのか不明なので、とりあえず100メガバイトで制限
                     returnMessage("画像サイズが大きすぎます。", "red", false);
+                } else if (w > 65535 || h > 65535) {
+                    returnMessage("画像の縦横のどちらかが極端に長すぎます。", "red", false); // Ex. 65536 x 5 ここまで極端な画像使わない...よね?
                 } else {
-                    convertToBase64([w & 0xff, w >> 8, h & 0xff, h >> 8]); //WidthとHeightを変換
+                    convertToBase64([w & 0xff, w >> 8, h & 0xff, h >> 8]); // WidthとHeightを変換
 
                     convertToBase64(rgb); //RGBを変換
                     returnMessage("画像を文字列に変換しました。", "green", false);
