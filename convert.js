@@ -10,7 +10,6 @@ const downloadButton = document.getElementById("download-button");
 const internalImage = document.getElementById("internal-image");
 var text = "";
 
-// ダウンロードボタンがクリックされたときの処理
 downloadButton.addEventListener("click", () => {
     if (text.length > 0) {
         const a = document.createElement("a");
@@ -22,7 +21,6 @@ downloadButton.addEventListener("click", () => {
     }
 });
 
-// コピーボタンがクリックされたときの処理
 copyButton.addEventListener("click", () => {
     if (text.length > 0) {
         navigator.clipboard.writeText(text)
@@ -47,7 +45,6 @@ dropArea.addEventListener("dragleave", () => {
     dropArea.style.borderColor = "#ccc";
 });
 
-// 画像がドロップされた時の処理
 dropArea.addEventListener("drop", (event) => {
     event.preventDefault();
     dropArea.style.borderColor = "#ccc";
@@ -58,12 +55,10 @@ dropArea.addEventListener("drop", (event) => {
     }
 });
 
-// 画像を選択ボタンがクリックされたときの処理
 selectButton.addEventListener("click", () => {
-    fileInput.click(); // 隠れたinputをクリック
+    fileInput.click();
 });
 
-// ファイルが選択されたときの処理
 fileInput.addEventListener("change", () => {
     const files = fileInput.files;
     if (files.length > 0) {
@@ -71,7 +66,6 @@ fileInput.addEventListener("change", () => {
     }
 });
 
-// 画像を読み込みから変換まで
 function loadAndConvertImage(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -86,7 +80,6 @@ function loadAndConvertImage(file) {
 
         // 画像を文字列に変換
         internalImage.onload = () => {
-            //console.log(internalImage.width + ", " + internalImage.height);
             const w = internalImage.width;
             const h = internalImage.height;
 
@@ -95,9 +88,6 @@ function loadAndConvertImage(file) {
             ctx.drawImage(internalImage, 0, 0);
 
             setTimeout(() => {
-                //const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                //const data = imageData.data;
-                //const length = data.length;
                 text = "";
 
                 let rgb = [];
@@ -127,9 +117,6 @@ function loadAndConvertImage(file) {
     reader.readAsDataURL(file);
 }
 
-// 6Bit (Base 64)で変換
-// 文字の使用範囲: UTF+0000 to UTF+003F
-// 容量倍率 4/3倍
 function convertToBase64(data) {
     const length = data.length;
     let string = "";
